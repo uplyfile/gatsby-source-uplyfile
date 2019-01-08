@@ -1,0 +1,20 @@
+{
+  allFile {
+    edges {
+      node {
+        id
+        publicURL
+        childImageUplyfile {
+          id
+          url {
+            base
+            full
+            operational
+            name
+          }
+          resize(width: 400, height: 400)
+        }
+      }
+    }
+  }
+}

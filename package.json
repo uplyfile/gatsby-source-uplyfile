@@ -1,0 +1,16 @@
+{
+    "name": "gatsby-source-uplyfile",
+    "description": "Gatsby transformer plugin for images using https://uplyfile.com",
+    "version": "0.0.1",
+    "bugs": {
+        "url": "https://github.com/uplyfile/gatsby-source-uplyfile/issues"
+    },
+    "keywords": [
+        "favicon",
+        "gatsby",
+        "gatsby-plugin",
+        "images",
+        "seo",
+        "uplyfile"
+    ]
+}
