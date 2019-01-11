@@ -2,15 +2,15 @@ const fetch = require("node-fetch")
 
 
 module.exports = async ({ cache }, pluginOptions) => {
-    await cache.set("uplyfile-public-key", pluginOptions.publicKey)
+    await cache.set("gatsby-source-uplyfile-public-key", pluginOptions.publicKey)
 
-    var uplyfileSeverListCache = await cache.get("uplyfile-cache")
+    var uplyfileSeverListCache = await cache.get("gatsby-source-uplyfile-cache")
 
 
     if (uplyfileSeverListCache === undefined) {
         let response = await fetch(
-            // "https://uplycdn.com/api/v1/files/",
-            "http://localhost:8001/api/v1/files/",
+            "https://uplycdn.com/api/v1/files/",
+            // "http://localhost:8001/api/v1/files/",
             {
                 headers: {
                     "Content-Type": "application/json",
@@ -26,7 +26,7 @@ module.exports = async ({ cache }, pluginOptions) => {
             etagToUrls[file.etag] = file.url
         }
 
-        await cache.set("uplyfile-cache", etagToUrls)
+        await cache.set("gatsby-source-uplyfile-cache", etagToUrls)
 
     }
 

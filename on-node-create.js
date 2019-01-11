@@ -23,11 +23,11 @@ module.exports = async function onCreateNode({ node, actions, createNodeId, cach
             return
         }
 
-        var uplyfileSeverListCache = await cache.get("uplyfile-cache")
+        var uplyfileSeverListCache = await cache.get("gatsby-source-uplyfile-cache")
 
-        if (!node.internal.contentDigest in uplyfileSeverListCache){
+        if (!(node.internal.contentDigest in uplyfileSeverListCache)){
 
-            let publicKey = await cache.get("uplyfile-public-key")
+            let publicKey = await cache.get("gatsby-source-uplyfile-public-key")
 
             var file = fs.createReadStream(node.absolutePath);
             const stats = fs.statSync(node.absolutePath);
@@ -41,8 +41,8 @@ module.exports = async function onCreateNode({ node, actions, createNodeId, cach
             })
 
             response = await fetch(
-                // "https://uplycdn.com/api/v1/upload/",
-                "http://localhost:8001/api/v1/upload/",
+                "https://uplycdn.com/api/v1/upload/",
+                // "http://localhost:8001/api/v1/upload/",
                 {
                     method: 'POST',
                     headers: {
@@ -56,7 +56,8 @@ module.exports = async function onCreateNode({ node, actions, createNodeId, cach
 
             uplyfileSeverListCache[node.internal.contentDigest] = fileDetails.url;
 
-            await cache.set("uplyfile-cache", uplyfileSeverListCache)
+            await cache.set("gatsby-source-uplyfile-cache", uplyfileSeverListCache)
+            console.log("Uploaded file to upyfile", node.internal.contentDigest)
 
         }
 

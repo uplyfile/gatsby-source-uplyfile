@@ -39,8 +39,28 @@ module.exports = ({ type, cache }) => {
             url: {
                 type: UrlType,
                 resolve: async (url) => {
-                    var uplyfileSeverListCache = await cache.get("uplyfile-cache")
+                    var uplyfileSeverListCache = await cache.get("gatsby-source-uplyfile-cache")
                     return uplyfileSeverListCache[url.internal.contentDigest];
+                }
+            },
+            operations: {
+                type: GraphQLString,
+                args: {
+                    value: {
+                        type: GraphQLString,
+                        defaultValue: null
+                    }
+                },
+                resolve: async (node, fieldArgs, context) => {
+                    var uplyfileSeverListCache = await cache.get("gatsby-source-uplyfile-cache")
+                    let url = uplyfileSeverListCache[node.internal.contentDigest];
+                    fieldArgs.value === null
+
+                    if (fieldArgs.value === null){
+                        return url.full
+                    }
+
+                    return `${url.base}/${fieldArgs.value}/${url.name}`
                 }
             },
             resize: {
@@ -56,7 +76,7 @@ module.exports = ({ type, cache }) => {
                     },
                 },
                 resolve: async (node, fieldArgs, context) => {
-                    var uplyfileSeverListCache = await cache.get("uplyfile-cache")
+                    var uplyfileSeverListCache = await cache.get("gatsby-source-uplyfile-cache")
                     let url = uplyfileSeverListCache[node.internal.contentDigest];
 
                     var operation = "resize:"
@@ -83,7 +103,7 @@ module.exports = ({ type, cache }) => {
                     },
                 },
                 resolve: async (node, fieldArgs, context) => {
-                    var uplyfileSeverListCache = await cache.get("uplyfile-cache")
+                    var uplyfileSeverListCache = await cache.get("gatsby-source-uplyfile-cache")
                     let url = uplyfileSeverListCache[node.internal.contentDigest];
 
                     var operation = "blur"
