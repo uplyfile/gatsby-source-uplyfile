@@ -20,38 +20,27 @@ var UrlType = new GraphQLObjectType({
     fields: {
         base: {
             type: GraphQLString,
-            resolve: (source, fieldArgs) => {
-                return "https://uplycdn.com/JxXkT0/brwNBf0xNjvb"
-            }
         },
         full: {
             type: GraphQLString,
-            resolve: (source, fieldArgs) => {
-                return "https://uplycdn.com/JxXkT0/brwNBf0xNjvb/bmw-i8-coupe-home-sp-xxl.jpg"
-            }
         },
         name: {
             type: GraphQLString,
-            resolve: (source, fieldArgs) => {
-                return "bmw-i8-coupe-home-sp-xxl.jpg"
-            }
         },
         operational: {
             type: GraphQLString,
-            resolve: (source, fieldArgs) => {
-                return "https://uplycdn.com/JxXkT0/brwNBf0xNjvb/"
-            }
         },
     }
 });
 
-module.exports = ({ type }) => {
+module.exports = ({ type, cache }) => {
     if (type.name === `ImageUplyfile`) {
         return {
             url: {
                 type: UrlType,
-                resolve: (url) => {
-                    return ''
+                resolve: async (url) => {
+                    var uplyfileSeverListCache = await cache.get("uplyfile-cache")
+                    return uplyfileSeverListCache[url.internal.contentDigest];
                 }
             },
             resize: {
@@ -66,29 +55,46 @@ module.exports = ({ type }) => {
                         defaultValue: -1,
                     },
                 },
-                resolve: (node, fieldArgs, context) => {
-                    console.log("typeof node", typeof(node))
-                    console.log("NODE", node)
+                resolve: async (node, fieldArgs, context) => {
+                    var uplyfileSeverListCache = await cache.get("uplyfile-cache")
+                    let url = uplyfileSeverListCache[node.internal.contentDigest];
 
-                    return 'lol'
-                    // var operation = "resize:"
-                    // if (fieldArgs.width != -1 && fieldArgs.height != -1) {
-                    //     return image.url.full
-                    // }
+                    var operation = "resize:"
+                    if (fieldArgs.width == -1 && fieldArgs.height == -1) {
+                        return url.full
+                    }
 
-                    // if (fieldArgs.width != -1) {
-                    //     operation += 'h' + fieldArgs.height
-                    // } else if (fieldArgs.height != -1) {
-                    //     operation += 'w' + fieldArgs.width
-                    // } else {
-                    //     operation += fieldArgs.width + ':' + fieldArgs.height
-                    // }
-                    // return `${image.url.base}/${operation}/${image.url.name}`
+                    if (fieldArgs.width != -1 && fieldArgs.height == -1) {
+                        operation += 'h' + fieldArgs.height
+                    } else if (fieldArgs.height != -1 && fieldArgs.width == -1) {
+                        operation += 'w' + fieldArgs.width
+                    } else {
+                        operation += fieldArgs.width + ':' + fieldArgs.height
+                    }
+                    return `${url.base}/${operation}/${url.name}`
+                }
+            },
+            blur: {
+                type: GraphQLString,
+                args: {
+                    value: {
+                        type: GraphQLInt,
+                        defaultValue: -1,
+                    },
+                },
+                resolve: async (node, fieldArgs, context) => {
+                    var uplyfileSeverListCache = await cache.get("uplyfile-cache")
+                    let url = uplyfileSeverListCache[node.internal.contentDigest];
+
+                    var operation = "blur"
+                    if (fieldArgs.value != -1) {
+                        operation += ':' + fieldArgs.value
+                    }
+                    return `${url.base}/${operation}/${url.name}`
                 }
             }
         }
     }
 
-    // by default return empty object
     return {}
 }
