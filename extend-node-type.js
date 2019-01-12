@@ -1,5 +1,8 @@
+const fetch = require("node-fetch")
+
 const {
     GraphQLInt,
+    GraphQLFloat,
     GraphQLObjectType,
     GraphQLString,
 } = require(`gatsby/graphql`)
@@ -61,6 +64,57 @@ module.exports = ({ type, cache }) => {
                     }
 
                     return `${url.base}/${fieldArgs.value}/${url.name}`
+                }
+            },
+            fixed: {
+                type: new GraphQLObjectType({
+                    name: "ImageUplyfileFixed",
+                    fields: {
+                        aspectRatio: { type: GraphQLFloat },
+                        width: { type: GraphQLFloat },
+                        height: { type: GraphQLFloat },
+                        src: { type: GraphQLString },
+                        srcSet: { type: GraphQLString },
+                        srcWebp: { type: GraphQLString },
+                        srcSetWebp: { type: GraphQLString },
+                        originalName: { type: GraphQLString },
+                    }
+                }),
+                args: {
+                    width: {
+                        type: GraphQLInt,
+                    },
+                    height: {
+                        type: GraphQLInt,
+                    },
+                },
+                resolve: async (node, fieldArgs, context) => {
+                    var uplyfileSeverListCache = await cache.get("gatsby-source-uplyfile-cache")
+                    let url = uplyfileSeverListCache[node.internal.contentDigest];
+
+                    var width = fieldArgs.width
+                    var height = fieldArgs.height
+
+                    var basename = url.name.split('.').slice(0, -1).join()
+
+                    var aspectRatio = width / height
+
+                    var src = `${url.base}/${url.name}`
+                    var srcSet = `${url.base}/resize:w${width}/${url.name}, ${url.base}/resize:w${Math.round(width * 1.5)}/${url.name} 1.5x, ${url.base}/resize:w${Math.round(width * 2)}/${url.name} 2x`
+                    var srcWebp = `${url.base}/${basename}.webp`
+                    var srcSetWebp = `${url.base}/resize:w${width}/${basename}.webp, ${url.base}/resize:w${Math.round(width * 1.5)}/${basename}.webp 1.5x, ${url.base}/resize:w${Math.round(width * 2)}/${basename}.webp 2x`
+                    var originalName = url.name
+
+                    return {
+                        aspectRatio,
+                        width,
+                        height,
+                        src,
+                        srcSet,
+                        srcWebp,
+                        srcSetWebp,
+                        originalName,
+                    }
                 }
             },
             resize: {
