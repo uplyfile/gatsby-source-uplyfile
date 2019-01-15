@@ -28,6 +28,8 @@ module.exports = async function onCreateNode({ node, actions, createNodeId, cach
         if (!(node.internal.contentDigest in uplyfileSeverListCache)){
 
             let publicKey = await cache.get("gatsby-source-uplyfile-public-key")
+            let expires = await cache.get("gatsby-source-uplyfile-expires")
+            let uplySignature = await cache.get("gatsby-source-uplyfile-uply-signature")
 
             var file = fs.createReadStream(node.absolutePath);
             const stats = fs.statSync(node.absolutePath);
@@ -41,20 +43,31 @@ module.exports = async function onCreateNode({ node, actions, createNodeId, cach
             })
 
             response = await fetch(
-                "https://uplycdn.com/api/v1/upload/",
-                // "http://localhost:8001/api/v1/upload/",
+                // "https://uplycdn.com/api/v1/upload/",
+                "http://localhost:8001/api/v1/upload/",
                 {
                     method: 'POST',
                     headers: {
                         "Uply-Public-Key": publicKey,
+                        "Uply-Signature": uplySignature,
+                        "Uply-Expires": expires,
                         ...formData.getHeaders(),
                     },
                     body: formData,
                 }
             )
+            if (response.status != 200) {
+                if (response.status == 403) {
+                    let error = await response.json()
+                    console.log("ERROR:", error)
+                    throw `Uplyfile files upload endpoint returned ${response.status}.`
+
+                }
+                throw `Uplyfile files upload endpoint returned ${response.status}.`
+            }
             fileDetails = await response.json()
 
-            uplyfileSeverListCache[node.internal.contentDigest] = fileDetails.url;
+            uplyfileSeverListCache[node.internal.contentDigest] = fileDetails[0].url;
 
             await cache.set("gatsby-source-uplyfile-cache", uplyfileSeverListCache)
             console.log("Uploaded file to upyfile", node.internal.contentDigest)
