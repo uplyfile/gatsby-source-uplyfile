@@ -43,8 +43,8 @@ module.exports = async function onCreateNode({ node, actions, createNodeId, cach
             })
 
             response = await fetch(
-                // "https://uplycdn.com/api/v1/upload/",
-                "http://localhost:8001/api/v1/upload/",
+                "https://uplycdn.com/api/v1/upload/",
+                // "http://localhost:8001/api/v1/upload/",
                 {
                     method: 'POST',
                     headers: {

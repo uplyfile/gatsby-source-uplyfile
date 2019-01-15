@@ -1,8 +1,9 @@
 const fetch = require("node-fetch")
 
 const {
-    GraphQLInt,
+    GraphQLBoolean,
     GraphQLFloat,
+    GraphQLInt,
     GraphQLObjectType,
     GraphQLString,
 } = require(`gatsby/graphql`)
@@ -87,6 +88,22 @@ module.exports = ({ type, cache }) => {
                     height: {
                         type: GraphQLInt,
                     },
+                    jpegProgressive: {
+                        type: GraphQLBoolean,
+                        defaultValue: true,
+                    },
+                    grayscale: {
+                        type: GraphQLBoolean,
+                        defaultValue: false,
+                    },
+                    quality: {
+                        type: GraphQLInt,
+                        defaultValue: null,
+                    },
+                    rotate: {
+                        type: GraphQLInt,
+                        defaultValue: 0,
+                    },
                 },
                 resolve: async (node, fieldArgs, context) => {
                     var uplyfileSeverListCache = await cache.get("gatsby-source-uplyfile-cache")
@@ -95,14 +112,42 @@ module.exports = ({ type, cache }) => {
                     var width = fieldArgs.width
                     var height = fieldArgs.height
 
-                    var basename = url.name.split('.').slice(0, -1).join()
+                    var splited = url.name.split('.')
+                    var basename = splited[0]
+                    var extension = splited[1].toLowerCase()
 
                     var aspectRatio = width / height
 
-                    var src = `${url.base}/${url.name}`
-                    var srcSet = `${url.base}/resize:w${width}/${url.name}, ${url.base}/resize:w${Math.round(width * 1.5)}/${url.name} 1.5x, ${url.base}/resize:w${Math.round(width * 2)}/${url.name} 2x`
-                    var srcWebp = `${url.base}/${basename}.webp`
-                    var srcSetWebp = `${url.base}/resize:w${width}/${basename}.webp, ${url.base}/resize:w${Math.round(width * 1.5)}/${basename}.webp 1.5x, ${url.base}/resize:w${Math.round(width * 2)}/${basename}.webp 2x`
+                    var operations = ''
+                    if (fieldArgs.jpegProgressive && (extension == 'jpeg' || extension == 'jpg')) {
+                        operations += ',progressive'
+                    }
+                    if (fieldArgs.grayscale) {
+                        operations += ',bw'
+                    }
+                    if (fieldArgs.quality) {
+                        var quality = fieldArgs.quality
+                        if (quality <= 0){
+                            quality = 1
+                        }
+                        else if (quality > 100) {
+                            quality = 100
+                        }
+                        operations += `,quality:${quality}`
+                    }
+                    if (fieldArgs.rotate) {
+                        operations += `,rotate:${fieldArgs.rotate}`
+                    }
+
+                    if (operations != '') {
+                        var srcWebp = `${url.base}/${operations.slice(1)}/${basename}.webp`
+                        var src = `${url.base}/${operations.slice(1)}/${url.name}`
+                    } else {
+                        var srcWebp = `${url.base}/${basename}.webp`
+                        var src = `${url.base}/${url.name}`
+                    }
+                    var srcSet = `${url.base}/resize:w${width}${operations}/${url.name}, ${url.base}/resize:w${Math.round(width * 1.5)}${operations}/${url.name} 1.5x, ${url.base}/resize:w${Math.round(width * 2)}${operations}/${url.name} 2x`
+                    var srcSetWebp = `${url.base}/resize:w${width}${operations}/${basename}.webp, ${url.base}/resize:w${Math.round(width * 1.5)}${operations}/${basename}.webp 1.5x, ${url.base}/resize:w${Math.round(width * 2)}${operations}/${basename}.webp 2x`
                     var originalName = url.name
 
                     return {

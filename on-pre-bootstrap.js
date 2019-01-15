@@ -18,8 +18,8 @@ module.exports = async ({ cache }, pluginOptions) => {
 
     if (uplyfileSeverListCache === undefined) {
         let response = await fetch(
-            // "https://uplycdn.com/api/v1/files/",
-            "http://localhost:8001/api/v1/files/",
+            "https://uplycdn.com/api/v1/files/",
+            // "http://localhost:8001/api/v1/files/",
             {
                 headers: {
                     "Content-Type": "application/json",
