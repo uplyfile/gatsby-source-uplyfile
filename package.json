@@ -5,6 +5,9 @@
     "bugs": {
         "url": "https://github.com/uplyfile/gatsby-source-uplyfile/issues"
     },
+    "dependencies": {
+        "probe-image-size": "^4.0.0"
+    },
     "keywords": [
         "favicon",
         "gatsby",

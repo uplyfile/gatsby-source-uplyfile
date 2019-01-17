@@ -1,5 +1,5 @@
 const fetch = require("node-fetch")
-const createSignature = require("./create-signature")
+const {createSignature} = require("../gatsby-plugin-uplyfile")
 
 
 module.exports = async ({ cache }, pluginOptions) => {

@@ -11,3 +11,14 @@ export const gatsbyImageUplyfileFixedPreferWebpNoBase64 = graphql`
     srcSetWebp
   }
 `
+
+export const gatsbyImageUplyfileFluidPreferWebpNoBase64 = graphql`
+  fragment GatsbyImageUplyfileFluid_withWebp_noBase64 on ImageUplyfileFluid {
+    width
+    height
+    src
+    srcSet
+    srcWebp
+    srcSetWebp
+  }
+`
